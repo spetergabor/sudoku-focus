@@ -142,7 +142,10 @@ export default function SudokuApp() {
       <div className="tools">
         <button onClick={undo} disabled={!game.history.length}><Icon>↶</Icon><span>Undo</span></button><button onClick={erase}><Icon>⌫</Icon><span>Erase</span></button><button className={notesMode ? "active" : ""} onClick={() => setNotesMode(n => !n)}><Icon>✎</Icon><span>Notes</span><em>{notesMode ? "ON" : "OFF"}</em></button><button onClick={hint} disabled={!game.hintsLeft}><Icon>◇</Icon><span>Hint</span><em>{game.hintsLeft}</em></button>
       </div>
-      <div className="keypad" aria-label="Number pad">{[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={() => input(n)}>{n}</button>)}</div>
+      <div className="keypad" aria-label="Number pad">{[1,2,3,4,5,6,7,8,9].map(n => {
+        const exhausted = game.cells.filter(value => value === n).length === 9;
+        return <button key={n} className={exhausted ? "exhausted" : ""} disabled={exhausted} aria-label={exhausted ? `${n} completed` : `Enter ${n}`} onClick={() => input(n)}>{exhausted ? "" : n}</button>;
+      })}</div>
       <button className="new-link" onClick={() => setModal(game.status === "playing" ? "confirm" : "new")}>New game</button>
     </section>}
 
