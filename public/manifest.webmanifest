@@ -2,7 +2,7 @@
   "name": "Sudoku — Play with focus",
   "short_name": "Sudoku",
   "description": "A calm, offline-friendly Sudoku game.",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f8f9fb",
   "theme_color": "#5368d9",
