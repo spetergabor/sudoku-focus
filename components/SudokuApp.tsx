@@ -21,6 +21,7 @@ export default function SudokuApp() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [settings, setSettings] = useState<GameSettings>(defaultSettings);
   const [celebrating, setCelebrating] = useState(false);
+  const [completedBox, setCompletedBox] = useState<number | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("sudoku.theme") as "light" | "dark" | null;
@@ -72,6 +73,16 @@ export default function SudokuApp() {
         return { ...current, mistakes, status: settings.mistakeLimit && mistakes >= 3 ? "over" : current.status, history };
       }
       const cells = [...current.cells]; cells[selected] = value;
+      const boxRow = Math.floor(Math.floor(selected / 9) / 3) * 3;
+      const boxCol = Math.floor((selected % 9) / 3) * 3;
+      const boxIndices = Array.from({ length: 9 }, (_, offset) => (boxRow + Math.floor(offset / 3)) * 9 + boxCol + offset % 3);
+      const boxWasComplete = boxIndices.every(index => current.cells[index] === current.solution[index]);
+      const boxIsComplete = boxIndices.every(index => cells[index] === current.solution[index]);
+      if (!boxWasComplete && boxIsComplete) {
+        const box = Math.floor(boxRow / 3) * 3 + Math.floor(boxCol / 3);
+        queueMicrotask(() => setCompletedBox(box));
+        setTimeout(() => setCompletedBox(null), 850);
+      }
       const notes = current.notes.map((n, i) => {
         if (!settings.autoNotes) return n;
         const sameRow = Math.floor(i / 9) === Math.floor(selected / 9), sameCol = i % 9 === selected % 9;
@@ -144,7 +155,7 @@ export default function SudokuApp() {
       <div className="progress-track" role="progressbar" aria-label="Puzzle progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: `${progress}%` }}></span></div>
       <div className={`board-wrap ${game.status === "paused" || game.status === "over" ? "obscured" : ""} ${celebrating ? "celebrating" : ""}`}>
         <div className="board" role="grid" aria-label="Sudoku board">
-          {game.cells.map((value, i) => { const r = Math.floor(i / 9), c = i % 9, sr = selected === null ? -1 : Math.floor(selected / 9), sc = selected === null ? -1 : selected % 9; const peer = selected !== null && (r === sr || c === sc || (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3))); return <button key={i} style={{ "--cell-delay": `${(r + c) * 38}ms` } as React.CSSProperties} role="gridcell" aria-label={`Row ${r + 1}, column ${c + 1}${value ? `, ${value}` : ""}`} className={`cell ${game.puzzle[i] ? "given" : ""} ${peer ? "peer" : ""} ${i === selected ? "selected" : ""} ${related && value === related ? "same" : ""}`} onClick={() => setSelected(i)}>
+          {game.cells.map((value, i) => { const r = Math.floor(i / 9), c = i % 9, sr = selected === null ? -1 : Math.floor(selected / 9), sc = selected === null ? -1 : selected % 9; const peer = selected !== null && (r === sr || c === sc || (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3))); const box = Math.floor(r / 3) * 3 + Math.floor(c / 3); const boxPosition = (r % 3) + (c % 3); return <button key={i} style={{ "--cell-delay": `${(r + c) * 38}ms`, "--box-delay": `${boxPosition * 48}ms` } as React.CSSProperties} role="gridcell" aria-label={`Row ${r + 1}, column ${c + 1}${value ? `, ${value}` : ""}`} className={`cell ${game.puzzle[i] ? "given" : ""} ${peer ? "peer" : ""} ${i === selected ? "selected" : ""} ${related && value === related ? "same" : ""} ${completedBox === box ? "box-complete" : ""}`} onClick={() => setSelected(i)}>
             {value || <span className="notes">{Array.from({ length: 9 }, (_, n) => <i key={n}>{game.notes[i].includes(n + 1) ? n + 1 : ""}</i>)}</span>}
           </button>; })}
         </div>
