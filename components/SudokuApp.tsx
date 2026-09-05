@@ -137,7 +137,7 @@ export default function SudokuApp() {
           </button>; })}
         </div>
         {game.status === "paused" && <div className="pause-panel"><b>Game paused</b><span>Take your time.</span><button className="primary compact" onClick={() => setGame(g => g ? { ...g, status: "playing" } : g)}>Resume</button></div>}
-        {game.status === "over" && modal !== "result" && <div className="pause-panel"><b>Game over</b><span>Three mistakes — try a fresh puzzle.</span><button className="primary compact" onClick={() => setModal("new")}>New game</button></div>}
+        {game.status === "over" && modal !== "result" && <div className="pause-panel"><b>bumzi vagy</b><span>Three mistakes — try a fresh puzzle.</span><button className="primary compact" onClick={() => setModal("new")}>New game</button></div>}
       </div>
       <div className="tools">
         <button onClick={undo} disabled={!game.history.length}><Icon>↶</Icon><span>Undo</span></button><button onClick={erase}><Icon>⌫</Icon><span>Erase</span></button><button className={notesMode ? "active" : ""} onClick={() => setNotesMode(n => !n)}><Icon>✎</Icon><span>Notes</span><em>{notesMode ? "ON" : "OFF"}</em></button><button onClick={hint} disabled={!game.hintsLeft}><Icon>◇</Icon><span>Hint</span><em>{game.hintsLeft}</em></button>
