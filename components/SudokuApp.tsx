@@ -22,6 +22,8 @@ export default function SudokuApp() {
   const [settings, setSettings] = useState<GameSettings>(defaultSettings);
   const [celebrating, setCelebrating] = useState(false);
   const [completedBox, setCompletedBox] = useState<number | null>(null);
+  const [completedRow, setCompletedRow] = useState<number | null>(null);
+  const [completedCol, setCompletedCol] = useState<number | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("sudoku.theme") as "light" | "dark" | null;
@@ -82,6 +84,15 @@ export default function SudokuApp() {
         const box = Math.floor(boxRow / 3) * 3 + Math.floor(boxCol / 3);
         queueMicrotask(() => setCompletedBox(box));
         setTimeout(() => setCompletedBox(null), 850);
+      }
+      const row = Math.floor(selected / 9), col = selected % 9;
+      const rowIndices = Array.from({ length: 9 }, (_, offset) => row * 9 + offset);
+      const colIndices = Array.from({ length: 9 }, (_, offset) => offset * 9 + col);
+      if (!rowIndices.every(index => current.cells[index] === current.solution[index]) && rowIndices.every(index => cells[index] === current.solution[index])) {
+        queueMicrotask(() => setCompletedRow(row)); setTimeout(() => setCompletedRow(null), 850);
+      }
+      if (!colIndices.every(index => current.cells[index] === current.solution[index]) && colIndices.every(index => cells[index] === current.solution[index])) {
+        queueMicrotask(() => setCompletedCol(col)); setTimeout(() => setCompletedCol(null), 850);
       }
       const notes = current.notes.map((n, i) => {
         if (!settings.autoNotes) return n;
@@ -155,7 +166,7 @@ export default function SudokuApp() {
       <div className="progress-track" role="progressbar" aria-label="Puzzle progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: `${progress}%` }}></span></div>
       <div className={`board-wrap ${game.status === "paused" || game.status === "over" ? "obscured" : ""} ${celebrating ? "celebrating" : ""}`}>
         <div className="board" role="grid" aria-label="Sudoku board">
-          {game.cells.map((value, i) => { const r = Math.floor(i / 9), c = i % 9, sr = selected === null ? -1 : Math.floor(selected / 9), sc = selected === null ? -1 : selected % 9; const peer = selected !== null && (r === sr || c === sc || (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3))); const box = Math.floor(r / 3) * 3 + Math.floor(c / 3); const boxPosition = (r % 3) + (c % 3); return <button key={i} style={{ "--cell-delay": `${(r + c) * 38}ms`, "--box-delay": `${boxPosition * 48}ms` } as React.CSSProperties} role="gridcell" aria-label={`Row ${r + 1}, column ${c + 1}${value ? `, ${value}` : ""}`} className={`cell ${game.puzzle[i] ? "given" : ""} ${peer ? "peer" : ""} ${i === selected ? "selected" : ""} ${related && value === related ? "same" : ""} ${completedBox === box ? "box-complete" : ""}`} onClick={() => setSelected(i)}>
+          {game.cells.map((value, i) => { const r = Math.floor(i / 9), c = i % 9, sr = selected === null ? -1 : Math.floor(selected / 9), sc = selected === null ? -1 : selected % 9; const peer = selected !== null && (r === sr || c === sc || (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3))); const box = Math.floor(r / 3) * 3 + Math.floor(c / 3); const boxPosition = (r % 3) + (c % 3); const unitComplete = completedBox === box || completedRow === r || completedCol === c; const unitDelay = completedRow === r ? c : completedCol === c ? r : boxPosition; return <button key={i} style={{ "--cell-delay": `${(r + c) * 38}ms`, "--unit-delay": `${unitDelay * 48}ms` } as React.CSSProperties} role="gridcell" aria-label={`Row ${r + 1}, column ${c + 1}${value ? `, ${value}` : ""}`} className={`cell ${game.puzzle[i] ? "given" : ""} ${peer ? "peer" : ""} ${i === selected ? "selected" : ""} ${related && value === related ? "same" : ""} ${unitComplete ? "unit-complete" : ""}`} onClick={() => setSelected(i)}>
             {value || <span className="notes">{Array.from({ length: 9 }, (_, n) => <i key={n}>{game.notes[i].includes(n + 1) ? n + 1 : ""}</i>)}</span>}
           </button>; })}
         </div>
