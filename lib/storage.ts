@@ -1,7 +1,7 @@
 import type { Difficulty, Grid } from "./sudoku";
 
 export type HistoryItem = { cells: Grid; notes: number[][] };
-export type SavedGame = { puzzle: Grid; solution: Grid; cells: Grid; notes: number[][]; difficulty: Difficulty; seconds: number; mistakes: number; hintsLeft: number; hintsUsed: number; history: HistoryItem[]; status: "playing" | "paused" | "over" };
+export type SavedGame = { puzzle: Grid; solution: Grid; cells: Grid; notes: number[][]; difficulty: Difficulty; seconds: number; mistakes: number; hintsLeft: number; hintsUsed: number; history: HistoryItem[]; status: "playing" | "paused" | "over" | "complete" };
 export type Stats = { totalScore: number; played: number; completed: number; currentStreak: number; longestStreak: number; lastDate: string | null; byDifficulty: Record<Difficulty, { completed: number; bestTime: number | null; totalTime: number; bestScore: number }> };
 
 export const emptyStats = (): Stats => ({
